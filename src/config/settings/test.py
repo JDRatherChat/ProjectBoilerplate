@@ -5,16 +5,18 @@ Optimized for speed and reproducibility.
 
 from .base import *  # noqa
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'test-key-not-for-production'
+# ----------------------------------------------------
+# 🔐 Environment Variables (Forced for Test Stability)
+# ----------------------------------------------------
 
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key")
 DEBUG = False
-TEMPLATE_DEBUG = False
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-ALLOWED_HOSTS = ['testserver']
+# ----------------------------------------------------
+# 🛢 In-Memory SQLite DB
+# ----------------------------------------------------
 
-# Use in-memory SQLite database for testing
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -22,15 +24,24 @@ DATABASES = {
     }
 }
 
-# Use console email backend for testing
+# ----------------------------------------------------
+# 📬 Email Backend
+# ----------------------------------------------------
+
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
-# Use fast password hasher
+# ----------------------------------------------------
+# 🔐 Password Hashing (Fast)
+# ----------------------------------------------------
+
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
 
-# Use in-memory cache for testing
+# ----------------------------------------------------
+# ⚡️ In-Memory Cache
+# ----------------------------------------------------
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -39,7 +50,10 @@ CACHES = {
 }
 
 
-# Disable migrations when running tests
+# ----------------------------------------------------
+# 🚫 Disable Migrations
+# ----------------------------------------------------
+
 class DisableMigrations:
     def __contains__(self, item):
         return True
@@ -50,20 +64,32 @@ class DisableMigrations:
 
 MIGRATION_MODULES = DisableMigrations()
 
-# Celery settings for testing
+# ----------------------------------------------------
+# 🐇 Celery (Run tasks eagerly)
+# ----------------------------------------------------
+
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
-# Media files are stored in-memory during tests
+# ----------------------------------------------------
+# 🧪 In-Memory File Storage
+# ----------------------------------------------------
+
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.InMemoryStorage'
 
-# Disable CSRF protection in tests for simplicity
+# ----------------------------------------------------
+# 🔓 Disable CSRF in Tests
+# ----------------------------------------------------
+
 MIDDLEWARE = [
     middleware for middleware in MIDDLEWARE  # noqa: F405
     if middleware != 'django.middleware.csrf.CsrfViewMiddleware'
 ]
 
-# Disable logging during tests
+# ----------------------------------------------------
+# 🪵 Silent Logging During Tests
+# ----------------------------------------------------
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -77,3 +103,18 @@ LOGGING = {
         'level': 'CRITICAL',
     },
 }
+
+# Use this temporarily if you're trying to debug tests or want visibility during dev.
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'DEBUG',
+#     },
+# }

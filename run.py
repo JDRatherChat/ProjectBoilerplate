@@ -38,8 +38,8 @@ def main():
         sys.argv.pop(1)  # Remove the --prod argument
     else:
         # Development mode
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
-        env_file = Path(__file__).parent / 'environments' / 'local.env'
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
+        env_file = Path(__file__).parent / 'environments' / 'production.env'
 
     # Load environment variables
     env = load_env(env_file)

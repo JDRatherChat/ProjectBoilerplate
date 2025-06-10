@@ -3,8 +3,7 @@ Production settings for Django project.
 Optimized for security and performance.
 """
 
-# Load environment variables
-import environ
+import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -12,83 +11,114 @@ from .apps import *
 from .base import *  # noqa
 from .base import MIDDLEWARE
 
-env = environ.Env()
+# ----------------------------------------------------
+# ✅ Core Environment Settings
+# ----------------------------------------------------
 
-# Security Settings
-SECRET_KEY = env('DJANGO_SECRET_KEY')
-DEBUG = False
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-# HTTPS/SSL
+# ----------------------------------------------------
+# 🔐 Security Headers
+# ----------------------------------------------------
+
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Session/Cookie Settings
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
-# Database
+# ----------------------------------------------------
+# 🛢 Database via DATABASE_URL
+# ----------------------------------------------------
+
 DATABASES = {
-    'default': env.db('DATABASE_URL'),
+    'default': dj_database_url.parse(os.getenv("DATABASE_URL"))
 }
-DATABASES['default']['CONN_MAX_AGE'] = env.int('DATABASE_CONN_MAX_AGE', default=60)
+DATABASES['default']['CONN_MAX_AGE'] = int(os.getenv("DATABASE_CONN_MAX_AGE", 60))
 
-# Cache
+# ----------------------------------------------------
+# 🚀 Caching via Redis
+# ----------------------------------------------------
+
 CACHES = {
-    'default': env.cache('REDIS_URL'),
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
 }
 
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+# ----------------------------------------------------
+# 📬 Email Configuration
+# ----------------------------------------------------
 
-# Static/Media Files (using AWS S3)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+# ----------------------------------------------------
+# 📦 Static & Media Storage via S3
+# ----------------------------------------------------
+
 INSTALLED_APPS += ['storages']
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
 AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-AWS_S3_CUSTOM_DOMAIN = env('AWS_S3_CUSTOM_DOMAIN', default=None)
+AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")
 
 # Static Files
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/' if AWS_S3_CUSTOM_DOMAIN else 'https://%s.s3.amazonaws.com/static/' % AWS_STORAGE_BUCKET_NAME
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/' if AWS_S3_CUSTOM_DOMAIN else f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
 
 # Media Files
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' if AWS_S3_CUSTOM_DOMAIN else 'https://%s.s3.amazonaws.com/media/' % AWS_STORAGE_BUCKET_NAME
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/' if AWS_S3_CUSTOM_DOMAIN else f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
 
-# Security Middleware
+# ----------------------------------------------------
+# 🔐 Secure Middleware Stack
+# ----------------------------------------------------
+
 MIDDLEWARE = [
                  'django.middleware.security.SecurityMiddleware',
-                 'django.middleware.cache.UpdateCacheMiddleware',  # Full-site caching
+                 'django.middleware.cache.UpdateCacheMiddleware',
                  'whitenoise.middleware.WhiteNoiseMiddleware',
              ] + MIDDLEWARE + [
-                 'django.middleware.cache.FetchFromCacheMiddleware',  # Full-site caching
+                 'django.middleware.cache.FetchFromCacheMiddleware',
              ]
 
-# Sentry
+# ----------------------------------------------------
+# 📊 Sentry Integration
+# ----------------------------------------------------
+
 sentry_sdk.init(
-    dsn=env('SENTRY_DSN'),
+    dsn=os.getenv("SENTRY_DSN"),
     integrations=[DjangoIntegration()],
-    environment=env('SENTRY_ENVIRONMENT', default='production'),
-    traces_sample_rate=env.float('SENTRY_TRACES_SAMPLE_RATE', default=0.2),
+    environment=os.getenv("SENTRY_ENVIRONMENT", "production"),
+    traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", 0.2)),
     send_default_pii=True,
 )
 
-# Logging
+# ----------------------------------------------------
+# 🪵 Logging
+# ----------------------------------------------------
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -111,13 +141,16 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': env('DJANGO_LOG_LEVEL', default='INFO'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
     },
 }
 
-# API Rate Limiting
+# ----------------------------------------------------
+# 🔒 API Throttling
+# ----------------------------------------------------
+
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -129,8 +162,11 @@ REST_FRAMEWORK = {
     }
 }
 
-# Performance Optimizations
-TEMPLATES[0]['OPTIONS']['loaders'] = [  # noqa: F405
+# ----------------------------------------------------
+# ⚡️ Template Caching
+# ----------------------------------------------------
+
+TEMPLATES[0]['OPTIONS']['loaders'] = [
     ('django.template.loaders.cached.Loader', [
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',

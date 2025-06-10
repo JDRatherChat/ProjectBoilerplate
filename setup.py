@@ -54,7 +54,7 @@ def main():
     secret_key = generate_secret_key()
 
     # Update both local and production environment files
-    update_env_file(environments_dir / 'local.env', secret_key)
+    update_env_file(environments_dir / 'development.env', secret_key)
     update_env_file(environments_dir / 'production.env', secret_key)
 
     print("✅ Generated new Django secret key")
