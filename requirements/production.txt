@@ -1,0 +1,27 @@
+-r base.txt
+
+# WSGI Server
+gunicorn>=21.2.0  # Production-grade WSGI server
+uvicorn[standard]>=0.25.0  # ASGI server for WebSocket support
+
+# Process Management
+supervisor>=4.2.5  # Process control system
+
+# Caching & Sessions
+django-redis>=5.4.0  # Redis cache backend
+redis>=5.0.0  # Redis support
+
+# Performance & Optimization
+django-cache-memoize>=0.1.10  # Function/method result caching
+django-defender>=0.9.7  # Rate limiting and blocking
+django-maintenance-mode>=0.19.0  # Maintenance mode
+
+# Monitoring & Logging
+newrelic>=9.3.0  # Application performance monitoring
+elastic-apm>=6.18.0  # Elastic APM agent
+prometheus-client>=0.19.0  # Prometheus metrics
+
+# Security
+django-axes>=6.1.1  # Authentication security
+django-honeypot>=1.1.1  # Spam prevention
+django-stronghold>=0.4.0  # Default login required
