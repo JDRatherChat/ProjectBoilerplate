@@ -1,7 +1,18 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+
 import os
 import sys
+
+# manage.py / run.py
+import dotenv
+
+# Load from .env if it exists
+dotenv.read_dotenv()
+
+# Fallbacks for safety
+os.environ.setdefault("DJANGO_ENV", "local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.app")
 
 
 def main():

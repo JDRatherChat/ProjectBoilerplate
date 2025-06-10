@@ -7,5 +7,4 @@ if env == "production":
 elif env == "test":
     from settings.test import *
 else:
-    # Default to development
     from settings.development import *

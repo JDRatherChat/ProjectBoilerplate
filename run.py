@@ -7,7 +7,16 @@ import os
 import sys
 from pathlib import Path
 
+# manage.py / run.py
+import dotenv
 import environ
+
+# Load from .env if it exists
+dotenv.read_dotenv()
+
+# Fallbacks for safety
+os.environ.setdefault("DJANGO_ENV", "local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.app")
 
 
 def load_env(env_file):
