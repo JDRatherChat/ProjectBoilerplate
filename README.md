@@ -83,7 +83,7 @@ pip install -r requirements/development.txt
 5. Set up environment variables:
 
 ```bash
-cp .env.example .env
+cp .env.production.example .env
 # Edit .env with your settings
 ```
 

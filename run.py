@@ -1,59 +1,32 @@
 #!/usr/bin/env python
 """
 Environment-aware Django management script.
-This script automatically sets the correct Django settings module and loads environment variables.
+Uses DJANGO_ENV + DJANGO_SETTINGS_MODULE from .env or defaults.
 """
+
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
 
-# manage.py / run.py
-import dotenv
-import environ
+# Load .env from project root
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
-# Load from .env if it exists
-dotenv.read_dotenv()
-
-# Fallbacks for safety
-os.environ.setdefault("DJANGO_ENV", "local")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.app")
-
-
-def load_env(env_file):
-    """Load environment variables from file."""
-    env = environ.Env()
-    env_file = Path(env_file)
-    if env_file.exists():
-        env.read_env(str(env_file))
-    return env
+# Set safe fallbacks (if not already set)
+os.environ.setdefault("DJANGO_ENV", "development")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 
 def main():
-    """Run Django management commands with environment awareness."""
-    # Determine environment
-    if len(sys.argv) > 1 and sys.argv[1] == '--prod':
-        # Production mode
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
-        env_file = Path(__file__).parent / 'environments' / 'production.env'
-        sys.argv.pop(1)  # Remove the --prod argument
-    else:
-        # Development mode
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
-        env_file = Path(__file__).parent / 'environments' / 'production.env'
-
-    # Load environment variables
-    env = load_env(env_file)
-
+    """Run Django management commands."""
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed?"
-        ) from exc
+        raise ImportError("Couldn't import Django. Is it installed and on your path?") from exc
 
-    # Execute Django command
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
