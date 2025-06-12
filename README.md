@@ -1,208 +1,108 @@
-# Django Production-Ready Boilerplate
+# Django Project Boilerplate
 
-A production-ready Django boilerplate with best practices for security, testing, and deployment. This project serves as
-a solid foundation for building scalable Django applications.
+A clean, opinionated Django project scaffold for rapid development — includes:
 
-## 📚 Documentation
+- Modular `settings/` structure (dev, prod, test)
+- Docker and `docker-compose` support
+- Environment-based config loading (`.env`)
+- DRF and custom app layout (`apps/`)
+- Logging config
+- Local automation via `bootstrap.py`
+- Clean packaging with `setup.py`, `setup.cfg`, and `pyproject.toml`
 
-- [Project Context and History](docs/CONTEXT.md) - **Start Here!** Comprehensive guide to understand the project
-- [VS Code Setup Guide](docs/VSCODE_SETUP.md) - Development environment configuration
+---
 
-## Features
-
-- 🔒 Production-grade security settings
-- 🧪 Comprehensive test setup with pytest
-- 📊 Monitoring and logging configuration
-- 🚀 Performance optimizations
-- 🛠 Development tools and debugging
-- 📝 Code quality and linting (black, ruff)
-- 🔄 CI/CD with GitHub Actions
-- 🐳 Docker support
-- ⚡ Optimized VS Code configuration
-- 🔑 Django-allauth integration for authentication
-- 📱 Modern responsive templates
-
-## Project Structure
-
-```
-base/
-├── config/              # Core project configuration
-│   ├── __init__.py
-│   ├── asgi.py         # ASGI application config
-│   ├── urls.py         # Root URL configuration
-│   └── wsgi.py         # WSGI application config
-├── settings/           # Settings module
-│   ├── __init__.py
-│   ├── base.py        # Base settings
-│   ├── local.py       # Local development settings
-│   ├── test.py        # Testing settings
-│   └── production.py  # Production settings
-├── src/               # Application source code
-│   ├── accounts/      # User authentication app
-│   ├── static/        # Project-wide static files
-│   └── templates/     # Project-wide templates
-├── environments/      # Environment variables
-│   ├── local.env
-│   └── production.env
-└── requirements/      # Dependencies
-    ├── base.txt      # Base requirements
-    ├── development.txt # Development requirements
-    └── production.txt # Production requirements
-```
-
-## Quick Start
-
-1. Clone the repository:
+## 🚀 Quickstart
 
 ```bash
-git clone <repository-url>
-cd base
+git clone https://github.com/JDRatherChat/ProjectBoilerplate
+cd my-django-boilerplate
+python bootstrap.py
+````
+
+This will:
+
+* Delete the `.git` folder (so you can re-init your own repo)
+* Generate a new Django secret key
+* Create a `.venv` and install all dev dependencies
+
+---
+
+## 🔧 Project Structure
+
+```txt
+.
+├── src/
+│   ├── config/            # Django settings, URLs, WSGI/ASGI
+│   ├── apps/              # Your reusable Django apps
+│   ├── templates/         # Global templates
+│   ├── logs/              # Default log folder
+├── environments/          # .env files for dev, prod, test
+├── requirements/          # Separate pip files
+├── bootstrap.py           # Local project setup script
+├── setup.py / setup.cfg   # Packaging metadata
+├── pyproject.toml         # PEP 518 support
+├── docker-compose.yml     # For local dev or containerization
+└── README.md
 ```
 
-2. Run the setup script to generate a new secret key:
+---
+
+## 🧪 Running Tests
 
 ```bash
-python setup.py
+.venv/bin/python -m pytest
 ```
 
-3. Create and activate a virtual environment:
+Or with Make:
 
 ```bash
-python -m venv ../.base
-source ../.base/Scripts/activate  # Windows
-# OR
-source ../.base/bin/activate     # Unix/macOS
+make test
 ```
 
-4. Install dependencies:
+---
+
+## 🧼 Code Quality
+
+Format with `black` and `isort`, lint with `flake8`:
 
 ```bash
-pip install -r requirements/development.txt
+make lint
 ```
 
-5. Set up environment variables:
+---
+
+## 🐳 Docker Support
+
+If you're using Docker:
 
 ```bash
-cp .env.production.example .env
-# Edit .env with your settings
+docker-compose build
+docker-compose up
 ```
 
-6. Run migrations:
+Update your `DJANGO_ENV` and `DJANGO_SECRET_KEY` in `environments/production.env` accordingly.
 
-```bash
-python manage.py migrate
-```
+---
 
-7. Create a superuser:
+## 🔄 GitHub Actions
 
-```bash
-python manage.py createsuperuser
-```
+Basic CI pipeline included in `.github/workflows/ci.yaml`:
 
-8. Run the development server:
+* Python install
+* Dev dependencies
+* Run tests with `pytest`
 
-```bash
-python manage.py runserver
-```
+---
 
-## Testing Strategy
+## 🧠 License
 
-### Test-Driven Development (TDD)
+MIT – use freely, modify as needed.
 
-We follow a strict TDD approach for all new feature development:
+---
 
-1. Write failing tests first (Red)
-2. Implement minimum code to pass tests (Green)
-3. Refactor while maintaining passing tests (Refactor)
+## 🙌 Credits
 
-### Test Coverage Requirements
-
-- Minimum 80% code coverage required
-- All new features must include tests
-- Both success and failure cases must be tested
-
-### Testing Tools and Organization
-
-Tests are organized following the Django app structure:
+Built by JD Gresse with ❤️ using Django, Python, and some battle-tested dev experience.
 
 ```
-src/
-└── app_name/
-    └── tests/
-        ├── __init__.py
-        ├── test_models.py
-        ├── test_views.py
-        └── test_forms.py
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest
-
-# Run tests with coverage report
-pytest --cov
-
-# Run specific test file
-pytest path/to/test_file.py
-```
-
-## Development Workflow
-
-1. Create a new feature branch:
-
-```bash
-git checkout -b feature/name
-```
-
-2. Make changes and run tests:
-
-```bash
-pytest
-```
-
-3. Format code and check quality:
-
-```bash
-black .
-ruff check .
-```
-
-4. Commit changes:
-
-```bash
-git add .
-git commit -m "feat: description"
-```
-
-## VS Code Integration
-
-This project includes optimized VS Code settings for:
-
-- Python linting and formatting (black, ruff)
-- Django template support
-- Testing with pytest
-- Debugging configuration
-- Git integration
-- Editor consistency
-
-## Security
-
-- Production-grade security settings
-- Environment-based configuration
-- Secure secret management
-- CSRF, XSS, and clickjacking protection
-- Security middleware configuration
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
