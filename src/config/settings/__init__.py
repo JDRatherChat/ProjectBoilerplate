@@ -1,31 +1,37 @@
 """
 Environment-aware Django settings loader.
-This module dynamically loads base + environment-specific settings.
-Supports: development, production, test — based on DJANGO_ENV.
+Loads shared settings and applies overrides based on DJANGO_ENV.
 """
 
+import os
 from pathlib import Path
-
 from dotenv import load_dotenv
 
-# Load .env early from project root
+# -----------------------------
+# 📦 Load .env early
+# -----------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-# Core settings shared across all environments
+# -----------------------------
+# 🔧 Modular Base Imports
+# -----------------------------
 from .base import *
 from .apps import *
 from .database import *
-from .mail import *
 from .logging import *
 from .restframework import *
 
-# Select which overrides to apply
+# -----------------------------
+# 🌍 Environment-Specific Overrides
+# -----------------------------
 env = os.getenv("DJANGO_ENV", "development").lower()
 
 if env == "production":
     from .production import *
 elif env == "test":
     from .test import *
-else:
+elif env == "development":
     from .development import *
+else:
+    raise ValueError(f"Invalid DJANGO_ENV value: {env}")

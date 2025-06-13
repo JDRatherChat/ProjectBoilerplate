@@ -6,16 +6,19 @@ from .apps import *
 from .base import *  # noqa
 from .base import BASE_DIR
 
+import os
+import socket
+
 # ----------------------------------------------------
 # 🔐 Environment Variables
 # ----------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key")
-DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # ----------------------------------------------------
-# 🛢 Database
+# 🛢 Database — SQLite for local dev
 # ----------------------------------------------------
 
 DATABASES = {
@@ -26,7 +29,7 @@ DATABASES = {
 }
 
 # ----------------------------------------------------
-# 📬 Email Backend
+# 📬 Email Backend — console
 # ----------------------------------------------------
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -37,23 +40,22 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 INSTALLED_APPS += [
     'debug_toolbar',
-    'django_extensions'
+    'django_extensions',
 ]  # noqa: F405
 
 MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']  # noqa: F405
 
 INTERNAL_IPS = ['127.0.0.1']
 
-# Optional: Support for Docker internal IPs
+# Optional: Docker support
 try:
-    import socket
-
-    INTERNAL_IPS += [ip[: ip.rfind(".")] + ".1" for ip in socket.gethostbyname_ex(socket.gethostname())[2]]
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS += [ip[: ip.rfind(".")] + ".1" for ip in ips]
 except Exception:
     pass
 
 # ----------------------------------------------------
-# 🔓 Relaxed Security Settings for Dev
+# 🔓 Relaxed Security Settings
 # ----------------------------------------------------
 
 CSRF_COOKIE_SECURE = False
@@ -64,7 +66,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
 # ----------------------------------------------------
-# 🪵 Logging
+# 🪵 Logging — console only
 # ----------------------------------------------------
 
 LOGGING = {
@@ -77,12 +79,12 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': 'DEBUG',
     },
 }
 
 # ----------------------------------------------------
-# ⚡️ In-Memory Cache
+# ⚡️ Cache — local memory
 # ----------------------------------------------------
 
 CACHES = {

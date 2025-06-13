@@ -1,20 +1,21 @@
 """
-Test settings - used when running tests.
-Optimized for speed and reproducibility.
+Test settings — optimized for speed and reproducibility.
 """
 
 from .base import *  # noqa
 
+import os
+
 # ----------------------------------------------------
-# 🔐 Environment Variables (Forced for Test Stability)
+# 🔐 Environment Variables
 # ----------------------------------------------------
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key")
-DEBUG = False
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # ----------------------------------------------------
-# 🛢 In-Memory SQLite DB
+# 🧪 Database — in-memory SQLite
 # ----------------------------------------------------
 
 DATABASES = {
@@ -25,35 +26,31 @@ DATABASES = {
 }
 
 # ----------------------------------------------------
-# 📬 Email Backend
+# 📬 Email — no real emails sent
 # ----------------------------------------------------
 
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
 # ----------------------------------------------------
-# 🔐 Password Hashing (Fast)
+# 🔒 Security Middleware Relaxed
 # ----------------------------------------------------
 
+MIDDLEWARE = [
+    mw for mw in MIDDLEWARE  # noqa: F405
+    if mw != 'django.middleware.csrf.CsrfViewMiddleware'
+]
+
+# ----------------------------------------------------
+# 🧠 Optimizations for Testing
+# ----------------------------------------------------
+
+# Fast password hasher for speed
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
 
-# ----------------------------------------------------
-# ⚡️ In-Memory Cache
-# ----------------------------------------------------
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': '',
-    }
-}
-
-
-# ----------------------------------------------------
-# 🚫 Disable Migrations
-# ----------------------------------------------------
-
+# Disable migrations
 class DisableMigrations:
     def __contains__(self, item):
         return True
@@ -64,30 +61,15 @@ class DisableMigrations:
 
 MIGRATION_MODULES = DisableMigrations()
 
-# ----------------------------------------------------
-# 🐇 Celery (Run tasks eagerly)
-# ----------------------------------------------------
-
+# Celery eager mode (sync)
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
-# ----------------------------------------------------
-# 🧪 In-Memory File Storage
-# ----------------------------------------------------
-
+# In-memory file storage
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.InMemoryStorage'
 
 # ----------------------------------------------------
-# 🔓 Disable CSRF in Tests
-# ----------------------------------------------------
-
-MIDDLEWARE = [
-    middleware for middleware in MIDDLEWARE  # noqa: F405
-    if middleware != 'django.middleware.csrf.CsrfViewMiddleware'
-]
-
-# ----------------------------------------------------
-# 🪵 Silent Logging During Tests
+# 🪵 Logging — silence output
 # ----------------------------------------------------
 
 LOGGING = {
@@ -103,18 +85,3 @@ LOGGING = {
         'level': 'CRITICAL',
     },
 }
-
-# Use this temporarily if you're trying to debug tests or want visibility during dev.
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['console'],
-#         'level': 'DEBUG',
-#     },
-# }
