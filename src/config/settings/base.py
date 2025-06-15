@@ -111,3 +111,12 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # 🔧 Modular logging (imported here)
 # ----------------------------
 from .logging import *
+
+# ----------------------------
+# drf-spectacular config
+# ----------------------------
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Schema',
+    'DESCRIPTION': 'Auto-generated API docs',
+    'VERSION': '1.0.0',
+}

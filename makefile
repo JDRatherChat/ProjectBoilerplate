@@ -8,3 +8,6 @@ test:
 
 lint:
 .venv/bin/flake8 src tests
+
+compile:
+pip-compile requirements/requirements.in -o requirements/base.txt
