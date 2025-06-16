@@ -1,0 +1,17 @@
+-r base.in
+ipython
+django-extensions
+python-decouple
+python-dotenv
+pytest
+pytest-django
+pytest-env
+coverage
+black
+ruff
+mypy
+drf-spectacular[sidecar]
+django-debug-toolbar
+factory-boy
+faker
+pip-tools

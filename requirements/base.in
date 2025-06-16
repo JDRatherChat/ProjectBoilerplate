@@ -1,0 +1,12 @@
+Django>=4.2,<5.0
+djangorestframework
+dj-rest-auth
+django-allauth
+psycopg[binary]
+django-environ
+drf-spectacular
+djangorestframework-simplejwt
+Pillow
+django-cors-headers
+django-storages[amazon]
+boto3

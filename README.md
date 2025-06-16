@@ -106,3 +106,59 @@ MIT – use freely, modify as needed.
 Built by JD Gresse with ❤️ using Django, Python, and some battle-tested dev experience.
 
 ```
+
+
+## 🧰 Development Setup (v1.3+)
+
+### 🗂 Dependency Management
+
+We use [`pip-tools`](https://github.com/jazzband/pip-tools) for clean, reproducible dependency management. Edit the `requirements/*.in` files and run:
+
+```bash
+make compile-dev  # or compile-base / compile-prod
+```
+
+Then install:
+
+```bash
+make install-dev
+```
+
+### ✅ Pre-commit Hooks
+
+Set up automated formatting and linting before each commit:
+
+```bash
+make setup-pre-commit
+```
+
+This enables hooks like `black`, `ruff`, and `mypy` to run on staged files.
+
+### 🛠️ Makefile Shortcuts
+
+Use `make` commands for quick setup:
+
+- `make install-dev`: Install dev dependencies
+- `make compile-dev`: Compile `.in` → `.txt`
+- `make setup-pre-commit`: Enable pre-commit
+
+
+### 🔁 Optional Automation
+
+#### Auto-compile on Save
+You can run a background script that watches `.in` files for changes and auto-compiles them:
+
+```bash
+python tools/watch_in_compile.py
+```
+
+Make sure `watchdog` is installed (`pip install watchdog` or `make install-dev` if in dev.txt).
+
+#### Auto-compile on Git Push
+We use a local pre-commit hook that checks and compiles `.txt` files before pushing:
+
+```bash
+make setup-pre-commit
+```
+
+This runs `make compile-*` before every `git push`.

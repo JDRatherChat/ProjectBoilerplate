@@ -1,0 +1,9 @@
+-r base.in
+gunicorn
+whitenoise
+sentry-sdk[django]
+django-cors-headers
+django-environ
+django-redis
+celery
+redis
